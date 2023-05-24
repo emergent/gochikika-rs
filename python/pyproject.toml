@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "gochikika-py"
+version = "0.1.0"
+description = ""
+authors = ["emergent <yosikawa@gmail>"]
+readme = "README.md"
+packages = [{include = "gochikika_py"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.24.3"
+pandas = "^2.0.1"
+statsmodels = "^0.14.0"
+matplotlib = "^3.7.1"
+seaborn = "^0.12.2"
+polars = "^0.17.15"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

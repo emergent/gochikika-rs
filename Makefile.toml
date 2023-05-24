@@ -1,0 +1,27 @@
+[tasks.watch]
+run_task = [
+    { name = ["clippy", "test"] }
+]
+watch = true
+
+[tasks.clippy]
+command = "cargo"
+args = ["clippy"]
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+
+[tasks.run]
+command = "cargo"
+args = ["run", "--bin", "${@}"]
+
+[tasks.show-plot]
+command = "open"
+args = ["plotters-images/${@}.png", "-F"]
+
+[tasks.watch-plot]
+run_task = [
+    { name = ["clippy", "test", "run", "show-plot"] }
+]
+watch = { ignore_pattern = "plotters-images/*" }
