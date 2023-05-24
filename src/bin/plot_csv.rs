@@ -5,10 +5,10 @@ use polars::prelude::*;
 use std::ops::Range;
 
 const FILENAME: &str = "./data/2020413_utf8.csv";
-const OUT_FILENAME: &str = "./plotters-images/plot_csv.png";
 const FONT_STYLE: (&str, f64) = ("Hiragino Maru Gothic Pro", 20.0);
 const FIG_SIZE: (u32, u32) = (640, 300);
 
+/// `AnyValue`の日時情報を`DateTime<Utc>`に変換する関数
 fn value_to_utc(value: AnyValue) -> anyhow::Result<DateTime<Utc>> {
     let x = NaiveDateTime::from(&value);
     let d = x
@@ -18,10 +18,12 @@ fn value_to_utc(value: AnyValue) -> anyhow::Result<DateTime<Utc>> {
     Ok(d)
 }
 
+/// `DataFrame`から日時を1件抽出し`DateTime<Utc>`にして返す関数
 fn df_to_utc(df: &DataFrame) -> anyhow::Result<DateTime<Utc>> {
     value_to_utc(df.column("")?.get(0)?)
 }
 
+/// `LazyFrame`の日時列の一番古い・新しい時刻で`Range`を作る
 fn get_date_range(
     lf: &LazyFrame,
 ) -> anyhow::Result<Range<DateTime<Utc>>> {
@@ -34,6 +36,7 @@ fn get_date_range(
     })
 }
 
+/// `f64`の`Series`の上限＆下限をRangeにして返す
 fn get_value_range(series: &Series) -> anyhow::Result<Range<f64>> {
     Ok(Range {
         start: series.min().context("couldn't find a min value")?,
@@ -41,7 +44,12 @@ fn get_value_range(series: &Series) -> anyhow::Result<Range<f64>> {
     })
 }
 
-fn plot_figs(lf: &LazyFrame, col_name: &str) -> anyhow::Result<()> {
+/// `LazyFrame`から指定した列のグラフを出力する
+fn plot_figs(
+    lf: &LazyFrame,
+    col_name: &str,
+    file_name: &str,
+) -> anyhow::Result<()> {
     let date_range = get_date_range(lf)?;
 
     let df = lf.clone().select([col(""), col(col_name)]).collect()?;
@@ -49,8 +57,8 @@ fn plot_figs(lf: &LazyFrame, col_name: &str) -> anyhow::Result<()> {
     let xs = &df[0];
     let ys = &df[col_name];
 
-    let root =
-        BitMapBackend::new(OUT_FILENAME, FIG_SIZE).into_drawing_area();
+    let name = format!("plotters-images/plot_fig_{:02}.png", file_name);
+    let root = BitMapBackend::new(&name, FIG_SIZE).into_drawing_area();
     root.fill(&WHITE)?;
     let root = root.margin(20, 20, 20, 20);
 
@@ -79,7 +87,7 @@ fn plot_figs(lf: &LazyFrame, col_name: &str) -> anyhow::Result<()> {
         .draw()?;
 
     root.present().context("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir")?;
-    println!("Result has been saved to {}", OUT_FILENAME);
+    println!("Result has been saved to {}", name);
 
     Ok(())
 }
@@ -92,7 +100,17 @@ fn main() -> anyhow::Result<()> {
         .with_encoding(CsvEncoding::Utf8)
         .finish()?;
 
-    plot_figs(&lf, "コンプレッサー出口温度_PV")?;
+    let plot_list = [
+        ("気化器液面レベル_PV", "level_pv"),
+        ("気化器液面レベル_SV", "level_sv"),
+        ("気化器液面レベル_MV", "level_mv"),
+        ("コンプレッサー出口温度_PV", "comp_pv"),
+        ("コンプレッサー出口温度_SV", "comp_sv"),
+    ];
+
+    for (col_name, file_name) in plot_list {
+        plot_figs(&lf, col_name, file_name)?;
+    }
 
     Ok(())
 }
