@@ -7,6 +7,7 @@ use std::ops::Range;
 const FILENAME: &str = "./data/2020413_utf8.csv";
 const FONT_STYLE: (&str, f64) = ("Hiragino Maru Gothic Pro", 20.0);
 const FIG_SIZE: (u32, u32) = (640, 300);
+const OUT_DIR: &str = "plotters-images";
 
 fn main() -> anyhow::Result<()> {
     let lf = LazyCsvReader::new(FILENAME)
@@ -44,7 +45,7 @@ fn plot_figs(
     let xs = &df[0];
     let ys = &df[col_name];
 
-    let name = format!("plotters-images/plot_fig_{:02}.png", file_name);
+    let name = format!("{}/plot_fig_{}.png", OUT_DIR, file_name);
     let root = BitMapBackend::new(&name, FIG_SIZE).into_drawing_area();
     root.fill(&WHITE)?;
     let root = root.margin(20, 20, 20, 20);
@@ -70,10 +71,10 @@ fn plot_figs(
         .x_label_formatter(&|v| {
             format!("{:02}:{:02}", v.hour(), v.minute())
         })
-        .y_label_formatter(&|v| format!("{:.1}", v))
+        .y_label_formatter(&|v| format!("{}", v))
         .draw()?;
 
-    root.present().context("Unable to write result to file, please make sure 'plotters-doc-data' dir exists under current dir")?;
+    root.present().context("Unable to write result to file")?;
     println!("Result has been saved to {}", name);
 
     Ok(())
