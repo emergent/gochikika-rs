@@ -6,9 +6,8 @@ fn main() -> anyhow::Result<()> {
     let lf = LazyCsvReader::new(FILENAME)
         .with_try_parse_dates(true)
         .has_header(true)
-        .with_null_values(Some(NullValues::AllColumnsSingle(
-            "None".into(),
-        )))
+        .with_ignore_errors(true)
+        .with_encoding(CsvEncoding::Utf8)
         .finish()?;
 
     let df = lf.clone().collect()?;
@@ -23,7 +22,6 @@ fn main() -> anyhow::Result<()> {
     println!("{}", df.min()); // 最小値
     println!("{}", df.max()); // 最大値
     println!("{}", df.median()); // 中央値
-                                 //println!("{}", df.); // 共分散
 
     println!(
         "{}",
@@ -56,10 +54,11 @@ fn main() -> anyhow::Result<()> {
         println!("{}\tskew: {}\tkurt: {}", name, skew, kurt);
 
         // 最頻値
-        //let mode = series.mode()?;
-        //println!("{}", mode);
+        let mode = series.mode()?;
+        println!("{}", mode);
     }
 
+    // 共分散
     let cov = lf
         .clone()
         .select([cov(col("気化器圧力_PV"), col("気化器圧力_SV"))
@@ -67,6 +66,7 @@ fn main() -> anyhow::Result<()> {
         .collect()?;
     println!("{}", cov);
 
+    // 相関係数
     let corr = lf
         .select([pearson_corr(
             col("気化器圧力_PV"),
