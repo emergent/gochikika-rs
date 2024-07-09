@@ -1,3 +1,4 @@
+import itertools
 import polars as pl
 
 FILENAME = "../data/2020413_utf8.csv"
