@@ -64,7 +64,7 @@ fn main() -> anyhow::Result<()> {
     // 共分散
     let cov = lf
         .clone()
-        .select([cov(col("気化器圧力_PV"), col("気化器圧力_SV"))
+        .select([cov(col("気化器圧力_PV"), col("気化器圧力_SV"), 1)
             .alias("cov")])
         .collect()?;
     println!("{}", cov);
@@ -74,7 +74,7 @@ fn main() -> anyhow::Result<()> {
         .select([pearson_corr(
             col("気化器圧力_PV"),
             col("気化器圧力_SV"),
-            0,
+            1,
         )
         .alias("corr")])
         .collect()?;
