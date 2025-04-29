@@ -47,14 +47,17 @@ fn main() -> anyhow::Result<()> {
         println!("{}\tmean: {}\tvar: {}", name, mean, var);
 
         // 歪度
-        let Some(skew) = series.skew(false)? else { continue };
+        let Some(skew) = series.skew(false)? else {
+            continue;
+        };
         // 尖度
-        let Some(kurt) =
-            series.kurtosis(false, false)? else { continue };
+        let Some(kurt) = series.kurtosis(false, false)? else {
+            continue;
+        };
         println!("{}\tskew: {}\tkurt: {}", name, skew, kurt);
 
         // 最頻値
-        let mode = series.mode()?;
+        let mode = polars::prelude::mode::mode(series)?;
         println!("{}", mode);
     }
 

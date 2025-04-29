@@ -10,7 +10,7 @@ anyhow = "1.0.71"
 chrono = "0.4.24"
 ndarray = "0.15.6"
 plotters = { version = "0.3.4", features = ["datetime"] }
-polars = { version = "0.32.0", features = [
+polars = { version = "0.34.0", features = [
     "lazy",
     "csv",
     "describe",
