@@ -47,21 +47,24 @@ fn main() -> anyhow::Result<()> {
         println!("{}\tmean: {}\tvar: {}", name, mean, var);
 
         // 歪度
-        let Some(skew) = series.skew(false)? else { continue };
+        let Some(skew) = series.skew(false)? else {
+            continue;
+        };
         // 尖度
-        let Some(kurt) =
-            series.kurtosis(false, false)? else { continue };
+        let Some(kurt) = series.kurtosis(false, false)? else {
+            continue;
+        };
         println!("{}\tskew: {}\tkurt: {}", name, skew, kurt);
 
         // 最頻値
-        let mode = series.mode()?;
+        let mode = polars::prelude::mode::mode(series)?;
         println!("{}", mode);
     }
 
     // 共分散
     let cov = lf
         .clone()
-        .select([cov(col("気化器圧力_PV"), col("気化器圧力_SV"))
+        .select([cov(col("気化器圧力_PV"), col("気化器圧力_SV"), 1)
             .alias("cov")])
         .collect()?;
     println!("{}", cov);
@@ -71,7 +74,7 @@ fn main() -> anyhow::Result<()> {
         .select([pearson_corr(
             col("気化器圧力_PV"),
             col("気化器圧力_SV"),
-            0,
+            1,
         )
         .alias("corr")])
         .collect()?;
